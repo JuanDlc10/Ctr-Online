@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CTR Online By JuanDlc (Seiya)</title>
+    <title>CTR Online - By JuanDlc</title>
+    <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
-    <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
     <div class="barra-estado">
         <div class="barra-izq">
             <div>Sala: <span id="mi-id" class="id-badge">Cargando...</span></div>
-            <button id="btn-copiar-link" class="btn-barra btn-copiar">🔗 Copiar Link de Invitación</button>
+            <button id="btn-copiar-link" class="btn-barra btn-copiar">🔗 Copiar Link</button>
             <div id="badge-rol" class="badge-jugador">Jugador ?</div>
             <div id="estado-red" style="color: #aaa;">⚪ En espera...</div>
         </div>
@@ -20,9 +20,12 @@
         <div class="barra-der">
             <select id="selector-camara" class="selector-camara">
                 <option value="menu">📺 Vista: Menú Completo</option>
-                <option value="2p">🏎️ Vista 2P (Mi Pantalla Completa)</option>
-                <option value="4p">🔥 Vista 3P/4P (Mi Esquina Completa)</option>
+                <option value="2p">🏎️ Vista 2P (Mi Pantalla)</option>
+                <option value="4p">🔥 Vista 3P/4P (Mi Esquina)</option>
             </select>
+            <button id="btn-audio-local" class="btn-barra btn-audio">🔊 Mi Audio: ON</button>
+
+            <button id="btn-fullscreen" class="btn-barra btn-fullscreen">⛶ Pantalla Completa</button>
             <button id="btn-forzar-multitap" class="btn-barra btn-multitap">🔌 Reconectar Multitap 4P</button>
             <button id="btn-toggle-mando" class="btn-barra btn-mando">🎮 Mando: ON (Ventana activa)</button>
         </div>
@@ -56,19 +59,21 @@
                 <label>Código de Sala:</label>
                 <input type="text" id="input-id-host" placeholder="Código corto de la sala...">
             </div>
-            <div style="font-size: 12px; color: #00ff88; background: #252530; padding: 10px; border-radius: 6px;">
-                <strong>Controles Listos:</strong><br>
+            <div class="caja-info-controles">
+                <strong>Controles y Audio Listos (P2, P3 y P4):</strong><br>
+                • <b>Audio en vivo:</b> Escucharás el juego aunque el Host se ponga en Mute.<br>
                 • <b>Mando USB/Bluetooth:</b> Automático al presionar botones.<br>
                 • <b>Teclado:</b> Flechas + Z (Acelerar), X (Freno), A (Arma), S (Triángulo), Q/W (Saltar/Derrapar), Enter (Start).
             </div>
             <button id="btn-unirse" class="principal secundario">Entrar a la Carrera</button>
         </div>
     </div>
-
     <div class="layout-partida" id="layout-partida">
-        <div id="contenedor-emulador"><div id="juego"></div></div>
-        <div id="contenedor-invitado"><video id="video-remoto" autoplay playsinline></video></div>
-
+        
+        <div id="viewport-juego">
+            <div id="contenedor-emulador"><div id="juego"></div></div>
+            <div id="contenedor-invitado"><video id="video-remoto" autoplay playsinline></video></div>
+        </div>
         <div class="sidebar-sala">
             <div class="bloque-jugadores">
                 <h4>🏁 Pilotos en Sala (Multitap 4P)</h4>
@@ -85,6 +90,7 @@
             </div>
         </div>
     </div>
-    <script src="./scripts.js"></script>
+
+    <script src="scripts.js"></script>
 </body>
 </html>

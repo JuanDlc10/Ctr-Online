@@ -1,14 +1,54 @@
+window._audioStreamDestino = null;
+window._hostSpeakerGain = null;
+window._audioContextCapturado = null;
+let audioLocalMuteado = false;
+
+(function instalarInterceptorDeAudio() {
+    const connectOriginal = AudioNode.prototype.connect;
+
+    AudioNode.prototype.connect = function(destino, ...args) {
+        if (destino && (destino instanceof AudioDestinationNode || destino === this.context.destination)) {
+            const ctx = this.context;
+            window._audioContextCapturado = ctx;
+            if (!window._audioStreamDestino) {
+                window._audioStreamDestino = ctx.createMediaStreamDestination();
+            }
+            if (!window._hostSpeakerGain) {
+                window._hostSpeakerGain = ctx.createGain();
+                window._hostSpeakerGain.gain.value = audioLocalMuteado ? 0 : 1;
+                connectOriginal.call(window._hostSpeakerGain, ctx.destination);
+            }
+            try {
+                connectOriginal.call(this, window._audioStreamDestino);
+            } catch (e) {}
+            return connectOriginal.call(this, window._hostSpeakerGain, ...args);
+        }
+
+        return connectOriginal.call(this, destino, ...args);
+    };
+})();
+
 const paramsUrl = new URLSearchParams(window.location.search);
 const salaEnUrl = paramsUrl.get('sala');
 const codigoCortoGenerado = 'CTR-' + Math.random().toString(36).substring(2, 6).toUpperCase();
-
 const idInicialPeer = salaEnUrl ? undefined : codigoCortoGenerado;
-const peer = new Peer(idInicialPeer);
+
+const peer = new Peer(idInicialPeer, {
+    config: {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    }
+});
 
 const spanId = document.getElementById('mi-id');
 const estadoRed = document.getElementById('estado-red');
 const badgeRol = document.getElementById('badge-rol');
 const selectorCamara = document.getElementById('selector-camara');
+const btnAudioLocal = document.getElementById('btn-audio-local');
+const btnFullscreen = document.getElementById('btn-fullscreen');
 const btnToggleMando = document.getElementById('btn-toggle-mando');
 const btnForzarMultitap = document.getElementById('btn-forzar-multitap');
 const btnCopiarLink = document.getElementById('btn-copiar-link');
@@ -30,7 +70,7 @@ const conexionesActivas = [];
 if (salaEnUrl) {
     document.getElementById('input-id-host').value = salaEnUrl;
     document.getElementById('panel-crear-host').style.display = 'none';
-    estadoRed.textContent = `🔗 Link detectado para la sala ${salaEnUrl}`;
+    estadoRed.textContent = `🔗 Sala detectada: ${salaEnUrl}`;
 }
 
 peer.on('open', (id) => {
@@ -41,7 +81,48 @@ btnCopiarLink.addEventListener('click', () => {
     const urlInvitacion = `${window.location.origin}${window.location.pathname}?sala=${spanId.textContent}`;
     navigator.clipboard.writeText(urlInvitacion);
     btnCopiarLink.textContent = '✅ ¡Link Copiado!';
-    setTimeout(() => btnCopiarLink.textContent = '🔗 Copiar Link de Invitación', 2000);
+    setTimeout(() => btnCopiarLink.textContent = '🔗 Copiar Link', 2000);
+});
+
+btnAudioLocal.addEventListener('click', () => {
+    audioLocalMuteado = !audioLocalMuteado;
+
+    if (esHost) {
+        if (window._hostSpeakerGain) {
+            window._hostSpeakerGain.gain.value = audioLocalMuteado ? 0 : 1;
+        }
+        if (window._audioContextCapturado && window._audioContextCapturado.state === 'suspended') {
+            window._audioContextCapturado.resume();
+        }
+    } else {
+        const videoRemoto = document.getElementById('video-remoto');
+        if (videoRemoto) {
+            videoRemoto.muted = audioLocalMuteado;
+            videoRemoto.volume = audioLocalMuteado ? 0 : 1;
+        }
+    }
+
+    btnAudioLocal.textContent = audioLocalMuteado ? '🔇 Mi Audio: MUTE' : '🔊 Mi Audio: ON';
+    btnAudioLocal.classList.toggle('muteado', audioLocalMuteado);
+});
+
+btnFullscreen.addEventListener('click', () => {
+    const viewport = document.getElementById('viewport-juego');
+    if (!document.fullscreenElement) {
+        if (viewport.requestFullscreen) {
+            viewport.requestFullscreen();
+        } else if (viewport.webkitRequestFullscreen) {
+            viewport.webkitRequestFullscreen();
+        }
+    } else {
+        document.exitFullscreen();
+    }
+});
+
+window.addEventListener('keydown', (e) => {
+    if (!esHost && e.code === 'KeyF' && document.activeElement.id !== 'input-chat' && document.activeElement.tagName !== 'INPUT') {
+        btnFullscreen.click();
+    }
 });
 
 function renderizarListaPilotos() {
@@ -142,37 +223,69 @@ function inyectarBotonEnEmulador(slotIndex, idBotonRetroArch, presionado) {
     const valor = presionado ? 1 : 0;
     const ejs = window.EJS_emulator;
     if (!ejs) return;
+
+    if (ejs.Module?._retro_set_controller_port_device) {
+        ejs.Module._retro_set_controller_port_device(slotIndex, 1);
+    }
+
     if (ejs.gameManager?.functions?.simulateInput) {
         ejs.gameManager.functions.simulateInput(slotIndex, idBotonRetroArch, valor);
     } else if (ejs.gameManager?.simulateInput) {
         ejs.gameManager.simulateInput(slotIndex, idBotonRetroArch, valor);
+    } else if (ejs.Module?._simulate_input) {
+        ejs.Module._simulate_input(slotIndex, idBotonRetroArch, valor);
     }
 }
 
 function activarMultitapEnNúcleo(reiniciarConsola = false) {
     const ejs = window.EJS_emulator;
     if (!ejs) return;
+
+    if (ejs.Module?._retro_set_controller_port_device) {
+        for (let p = 0; p < 4; p++) {
+            ejs.Module._retro_set_controller_port_device(p, 1);
+        }
+    }
+
     const fs = ejs.Module?.FS || ejs.gameManager?.FS;
     if (fs) {
         const opcionesCore = [
             'pcsx_rearmed_multitap = "port 1"',
+            'pcsx_rearmed_multitap1 = "enabled"',
             'pcsx_rearmed_pad1type = "standard"',
             'pcsx_rearmed_pad2type = "standard"',
             'pcsx_rearmed_pad3type = "standard"',
             'pcsx_rearmed_pad4type = "standard"',
-            'input_max_users = "4"'
+            'pcsx_rearmed_pad5type = "standard"',
+            'input_max_users = "4"',
+            'input_libretro_device_p1 = "1"',
+            'input_libretro_device_p2 = "1"',
+            'input_libretro_device_p3 = "1"',
+            'input_libretro_device_p4 = "1"'
         ].join('\n') + '\n';
-        ['/home/web_user/retroarch/userdata/retroarch-core-options.cfg', '/retroarch-core-options.cfg'].forEach(r => {
-            try { fs.writeFile(r, opcionesCore); } catch (e) { }
+
+        [
+            '/home/web_user/retroarch/userdata/retroarch-core-options.cfg',
+            '/home/web_user/retroarch/userdata/config/PCSX-ReARMed/PCSX-ReARMed.opt',
+            '/retroarch-core-options.cfg'
+        ].forEach(r => {
+            try { fs.writeFile(r, opcionesCore); } catch (e) {}
         });
     }
+
     if (typeof ejs.changeSettingOption === 'function') {
         ejs.changeSettingOption('pcsx_rearmed_multitap', 'port 1');
         ejs.changeSettingOption('pcsx rearmed multitap', 'port 1');
+        ejs.changeSettingOption('pcsx_rearmed_pad3type', 'standard');
+        ejs.changeSettingOption('pcsx_rearmed_pad4type', 'standard');
     }
+
     if (ejs.gameManager?.setVariable) {
         ejs.gameManager.setVariable('pcsx_rearmed_multitap', 'port 1');
+        ejs.gameManager.setVariable('pcsx_rearmed_pad3type', 'standard');
+        ejs.gameManager.setVariable('pcsx_rearmed_pad4type', 'standard');
     }
+
     if (reiniciarConsola && ejs.gameManager?.functions?.restart) {
         ejs.gameManager.functions.restart();
     }
@@ -183,23 +296,19 @@ btnForzarMultitap.addEventListener('click', () => activarMultitapEnNúcleo(true)
 function obtenerStreamCompletoDelEmulador() {
     const canvas = document.querySelector('#juego canvas');
     if (!canvas) return null;
-    const stream = canvas.captureStream(60);
 
-    try {
-        const audioCtx = window.EJS_emulator?.Module?.SDL2?.audioContext || window.EJS_emulator?.audioContext;
-        if (audioCtx) {
-            if (!window._destinoAudioStream) {
-                window._destinoAudioStream = audioCtx.createMediaStreamDestination();
-                const gainNode = window.EJS_emulator?.Module?.SDL2?.audio?.scriptProcessorNode;
-                if (gainNode) gainNode.connect(window._destinoAudioStream);
-            }
-            const audioTracks = window._destinoAudioStream.stream.getAudioTracks();
-            if (audioTracks.length > 0) stream.addTrack(audioTracks[0]);
+    const videoStream = canvas.captureStream(60);
+    const pistas = [...videoStream.getVideoTracks()];
+
+    if (window._audioStreamDestino) {
+        const audioTracks = window._audioStreamDestino.stream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            pistas.push(audioTracks[0]);
         }
-    } catch (e) { }
-    return stream;
-}
+    }
 
+    return new MediaStream(pistas);
+}
 document.getElementById('btn-host').addEventListener('click', () => {
     const archivoRom = document.getElementById('input-rom').files[0];
     const archivoBios = document.getElementById('input-bios').files[0];
@@ -218,12 +327,14 @@ document.getElementById('btn-host').addEventListener('click', () => {
     badgeRol.style.display = 'inline-block';
     badgeRol.textContent = `👑 P1: ${miNickname}`;
     selectorCamara.style.display = 'inline-block';
+    btnAudioLocal.style.display = 'inline-block';
+    btnFullscreen.style.display = 'inline-block';
     btnForzarMultitap.style.display = 'inline-block';
     btnCopiarLink.style.display = 'inline-block';
     estadoRed.textContent = '🟢 Sala activa. Copia el link para invitar.';
 
     Object.keys(localStorage).forEach(k => localStorage.removeItem(k));
-    try { indexedDB.deleteDatabase('EmulatorJS-states'); } catch (e) { }
+    try { indexedDB.deleteDatabase('EmulatorJS-states'); } catch(e) {}
 
     window.EJS_player = '#juego';
     window.EJS_core = 'pcsx_rearmed';
@@ -233,6 +344,7 @@ document.getElementById('btn-host').addEventListener('click', () => {
     window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
     window.EJS_startOnLoaded = true;
     window.EJS_defaultControls = controlesPorDefecto;
+    window.EJS_volume = 1; 
     window.EJS_defaultOptions = {
         'pcsx_rearmed_multitap': 'port 1',
         'pcsx_rearmed_pad1type': 'standard',
@@ -241,7 +353,7 @@ document.getElementById('btn-host').addEventListener('click', () => {
         'pcsx_rearmed_pad4type': 'standard'
     };
 
-    window.EJS_onGameStart = function () {
+    window.EJS_onGameStart = function() {
         const ejs = window.EJS_emulator;
         if (ejs && ejs.controls) {
             ejs.controls = JSON.parse(JSON.stringify(controlesPorDefecto));
@@ -277,6 +389,10 @@ peer.on('connection', (conn) => {
     conexionesActivas.push(conn);
 
     conn.on('open', () => {
+        if (window.EJS_emulator?.Module?._retro_set_controller_port_device) {
+            window.EJS_emulator.Module._retro_set_controller_port_device(slotRetroArch, 1);
+        }
+
         conn.send({
             tipo: 'asignacion_jugador',
             numeroJugador: numJugadorAsignado,
@@ -285,10 +401,10 @@ peer.on('connection', (conn) => {
         });
     });
 
-    const esperarCanvas = setInterval(() => {
+    const esperarStream = setInterval(() => {
         const stream = obtenerStreamCompletoDelEmulador();
-        if (stream) {
-            clearInterval(esperarCanvas);
+        if (stream && stream.getVideoTracks().length > 0) {
+            clearInterval(esperarStream);
             peer.call(conn.peer, stream);
         }
     }, 500);
@@ -301,8 +417,8 @@ peer.on('connection', (conn) => {
             estadoPilotos[numJugadorAsignado].ping = 18;
             renderizarListaPilotos();
             retransmitirATodos({ tipo: 'actualizacion_lobby', estadoPilotos });
-            agregarMensajeChat('Sistema', `¡${datos.nick} se unió como Jugador ${numJugadorAsignado}!`);
-            retransmitirATodos({ tipo: 'chat', autor: 'Sistema', texto: `¡${datos.nick} se unió como Jugador ${numJugadorAsignado}!` });
+            agregarMensajeChat('Sistema', `¡${datos.nick} entró como Jugador ${numJugadorAsignado}!`);
+            retransmitirATodos({ tipo: 'chat', autor: 'Sistema', texto: `¡${datos.nick} entró como Jugador ${numJugadorAsignado}!` });
         } else if (datos.tipo === 'chat') {
             agregarMensajeChat(datos.autor, datos.texto);
             retransmitirATodos(datos);
@@ -334,6 +450,8 @@ document.getElementById('btn-unirse').addEventListener('click', () => {
     document.getElementById('layout-partida').style.display = 'flex';
     document.getElementById('contenedor-invitado').style.display = 'block';
     selectorCamara.style.display = 'inline-block';
+    btnAudioLocal.style.display = 'inline-block';
+    btnFullscreen.style.display = 'inline-block';
     btnToggleMando.style.display = 'inline-block';
     estadoRed.textContent = '🟡 Conectando a la sala...';
 
@@ -378,7 +496,20 @@ document.getElementById('btn-unirse').addEventListener('click', () => {
     peer.on('call', (llamada) => {
         llamada.answer();
         llamada.on('stream', (streamRemoto) => {
-            document.getElementById('video-remoto').srcObject = streamRemoto;
+            const video = document.getElementById('video-remoto');
+            video.srcObject = streamRemoto;
+            video.muted = audioLocalMuteado;
+            video.volume = 1;
+            video.play().catch(() => {
+                const desbloquearAudio = () => {
+                    video.muted = audioLocalMuteado;
+                    video.play();
+                    window.removeEventListener('keydown', desbloquearAudio);
+                    window.removeEventListener('click', desbloquearAudio);
+                };
+                window.addEventListener('keydown', desbloquearAudio);
+                window.addEventListener('click', desbloquearAudio);
+            });
         });
     });
 });
@@ -416,7 +547,10 @@ function iniciarCapturaControlesInvitado(conn) {
             requestAnimationFrame(loopMando);
             return;
         }
-        const gp = navigator.getGamepads()[0];
+
+        const gamepads = navigator.getGamepads ? navigator.getGamepads() : [];
+        const gp = Array.from(gamepads).find(g => g && g.connected);
+
         if (gp) {
             for (const [btnFisico, btnRetro] of Object.entries(mapaGamepadARetroArch)) {
                 const presionado = gp.buttons[btnFisico]?.pressed || false;
@@ -425,6 +559,7 @@ function iniciarCapturaControlesInvitado(conn) {
                     conn.send({ tipo: 'input_mando', boton: btnRetro, presionado: presionado });
                 }
             }
+
             const ejeX = gp.axes[0] || 0;
             const ejeY = gp.axes[1] || 0;
             const dirs = { izq: [ejeX < -0.4, 6], der: [ejeX > 0.4, 7], arr: [ejeY < -0.4, 4], aba: [ejeY > 0.4, 5] };

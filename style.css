@@ -1,326 +1,290 @@
- :root {
-     --naranja: #ff6600;
-     --morado: #8e44ad;
-     --verde: #00ff88;
-     --fondo: #0f0f13;
-     --panel: #1a1a22;
- }
+:root {
+    --naranja: #ff6600;
+    --morado: #8e44ad;
+    --verde: #00ff88;
+    --fondo: #0f0f13;
+    --panel: #1a1a22;
+}
 
- body {
-     background-color: var(--fondo);
-     color: #ffffff;
-     font-family: system-ui, -apple-system, sans-serif;
-     display: flex;
-     flex-direction: column;
-     align-items: center;
-     min-height: 100vh;
-     margin: 0;
-     padding: 10px;
-     box-sizing: border-box;
- }
+body {
+    background-color: var(--fondo);
+    color: #ffffff;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+}
 
- .barra-estado {
-     background: var(--panel);
-     padding: 10px 18px;
-     border-radius: 10px;
-     margin-bottom: 12px;
-     display: flex;
-     gap: 12px;
-     align-items: center;
-     flex-wrap: wrap;
-     border: 1px solid #2e2e3a;
-     font-size: 13px;
-     width: 100%;
-     max-width: 1240px;
-     box-sizing: border-box;
-     justify-content: space-between;
- }
+/* Barra Superior */
+.barra-estado {
+    background: var(--panel);
+    padding: 10px 18px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    border: 1px solid #2e2e3a;
+    font-size: 13px;
+    width: 100%;
+    max-width: 1240px;
+    box-sizing: border-box;
+    justify-content: space-between;
+}
 
- .barra-izq,
- .barra-der {
-     display: flex;
-     gap: 10px;
-     align-items: center;
-     flex-wrap: wrap;
- }
+.barra-izq, .barra-der {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
 
- .id-badge {
-     background: #2c2c38;
-     padding: 5px 12px;
-     border-radius: 6px;
-     color: var(--verde);
-     font-family: monospace;
-     font-size: 15px;
-     font-weight: bold;
- }
+.id-badge {
+    background: #2c2c38;
+    padding: 5px 12px;
+    border-radius: 6px;
+    color: var(--verde);
+    font-family: monospace;
+    font-size: 15px;
+    font-weight: bold;
+}
 
- .badge-jugador {
-     background: var(--naranja);
-     color: #fff;
-     padding: 5px 12px;
-     border-radius: 6px;
-     font-weight: bold;
-     display: none;
- }
+.badge-jugador {
+    background: var(--naranja);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    display: none;
+}
 
- .btn-barra,
- select.selector-camara {
-     background: var(--morado);
-     color: white;
-     border: none;
-     padding: 7px 12px;
-     border-radius: 6px;
-     font-weight: bold;
-     font-size: 12px;
-     cursor: pointer;
-     display: none;
- }
+.btn-barra, select.selector-camara {
+    background: var(--morado);
+    color: white;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    cursor: pointer;
+    display: none;
+}
 
- .btn-copiar {
-     background: #2980b9;
-     display: none;
- }
+.btn-copiar { background: #2980b9; }
+.btn-copiar:hover { background: #3498db; }
+.btn-audio { background: #2ecc71; }
+.btn-audio.muteado { background: #e74c3c; }
+.btn-fullscreen { background: #16a085; }
+.btn-fullscreen:hover { background: #1abc9c; }
+.btn-multitap { background: #e67e22; }
+.btn-mando { background: #27ae60; }
+.btn-mando.apagado { background: #c0392b; }
 
- .btn-copiar:hover {
-     background: #3498db;
- }
+/* Menús de Inicio */
+.contenedor-menus {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 900px;
+    margin-top: 30px;
+}
 
- .btn-multitap {
-     background: #e67e22;
- }
+.panel {
+    background: var(--panel);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    width: 380px;
+    border: 1px solid #2e2e3a;
+}
 
- .btn-mando {
-     background: #27ae60;
- }
+.panel h3 { margin-top: 0; color: var(--naranja); }
+.grupo-input { margin: 14px 0; text-align: left; }
+label { display: block; margin-bottom: 5px; font-size: 13px; color: #bbbbbb; }
 
- .btn-mando.apagado {
-     background: #c0392b;
- }
+input[type="file"], input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    background: #252530;
+    border: 1px solid #3d3d4d;
+    border-radius: 6px;
+    color: #fff;
+    box-sizing: border-box;
+}
 
- .contenedor-menus {
-     display: flex;
-     gap: 20px;
-     flex-wrap: wrap;
-     justify-content: center;
-     max-width: 900px;
-     margin-top: 30px;
- }
+.caja-info-controles {
+    font-size: 12px;
+    color: var(--verde);
+    background: #252530;
+    padding: 10px;
+    border-radius: 6px;
+}
 
- .panel {
-     background: var(--panel);
-     padding: 25px;
-     border-radius: 12px;
-     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
-     width: 380px;
-     border: 1px solid #2e2e3a;
- }
+button.principal {
+    background: var(--naranja);
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+}
 
- .panel h3 {
-     margin-top: 0;
-     color: var(--naranja);
- }
+button.secundario { background: #007bff; }
 
- .grupo-input {
-     margin: 14px 0;
-     text-align: left;
- }
+/* Layout Principal en Partida */
+.layout-partida {
+    display: none;
+    gap: 15px;
+    width: 100%;
+    max-width: 1240px;
+    justify-content: center;
+    align-items: flex-start;
+}
 
- label {
-     display: block;
-     margin-bottom: 5px;
-     font-size: 13px;
-     color: #bbbbbb;
- }
+#viewport-juego {
+    width: 920px;
+    height: 690px;
+    max-width: 95vw;
+    max-height: 82vh;
+    border: 2px solid #2e2e3a;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+    flex-shrink: 0;
+}
 
- input[type="file"],
- input[type="text"] {
-     width: 100%;
-     padding: 10px;
-     background: #252530;
-     border: 1px solid #3d3d4d;
-     border-radius: 6px;
-     color: #fff;
-     box-sizing: border-box;
- }
+#viewport-juego:fullscreen,
+#viewport-juego:-webkit-full-screen {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border: none;
+    border-radius: 0;
+}
 
- button.principal {
-     background: var(--naranja);
-     color: white;
-     border: none;
-     padding: 12px;
-     font-size: 15px;
-     font-weight: bold;
-     border-radius: 6px;
-     cursor: pointer;
-     width: 100%;
-     margin-top: 10px;
- }
+#contenedor-emulador, #contenedor-invitado {
+    width: 100%;
+    height: 100%;
+    display: none;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+}
 
- button.secundario {
-     background: #007bff;
- }
+#juego, #video-remoto {
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    transition: transform 0.25s ease;
+}
 
- .layout-partida {
-     display: none;
-     gap: 15px;
-     width: 100%;
-     max-width: 1240px;
-     justify-content: center;
-     align-items: flex-start;
- }
+/* Sidebar Lateral */
+.sidebar-sala {
+    width: 290px;
+    height: 690px;
+    max-height: 82vh;
+    background: var(--panel);
+    border: 1px solid #2e2e3a;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
- #contenedor-emulador,
- #contenedor-invitado {
-     width: 920px;
-     height: 690px;
-     max-width: 95vw;
-     max-height: 82vh;
-     display: none;
-     border: 2px solid #2e2e3a;
-     border-radius: 10px;
-     overflow: hidden;
-     background: #000;
-     position: relative;
-     flex-shrink: 0;
- }
+.bloque-jugadores {
+    padding: 15px;
+    border-bottom: 1px solid #2e2e3a;
+}
 
- #juego,
- #video-remoto {
-     width: 100%;
-     height: 100%;
-     object-fit: fill;
-     transition: transform 0.25s ease;
- }
+.bloque-jugadores h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--naranja);
+}
 
- .sidebar-sala {
-     width: 290px;
-     height: 690px;
-     max-height: 82vh;
-     background: var(--panel);
-     border: 1px solid #2e2e3a;
-     border-radius: 10px;
-     display: flex;
-     flex-direction: column;
-     overflow: hidden;
- }
+.slot-jugador {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #252530;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 13px;
+}
 
- .bloque-jugadores {
-     padding: 15px;
-     border-bottom: 1px solid #2e2e3a;
- }
+.slot-jugador.vacio { color: #666; font-style: italic; }
+.ping-tag { font-size: 11px; color: var(--verde); font-family: monospace; }
 
- .bloque-jugadores h4 {
-     margin: 0 0 10px 0;
-     font-size: 14px;
-     color: var(--naranja);
- }
+/* Chat en Vivo */
+.bloque-chat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    overflow: hidden;
+}
 
- .slot-jugador {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     background: #252530;
-     padding: 8px 10px;
-     border-radius: 6px;
-     margin-bottom: 6px;
-     font-size: 13px;
- }
+#mensajes-chat {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-right: 4px;
+}
 
- .slot-jugador.vacio {
-     color: #666;
-     font-style: italic;
- }
+.msg-item {
+    background: #252530;
+    padding: 6px 8px;
+    border-radius: 6px;
+    line-height: 1.3;
+}
 
- .ping-tag {
-     font-size: 11px;
-     color: var(--verde);
-     font-family: monospace;
- }
+.msg-autor { font-weight: bold; color: var(--naranja); }
 
- .bloque-chat {
-     flex: 1;
-     display: flex;
-     flex-direction: column;
-     padding: 12px;
-     overflow: hidden;
- }
+.chat-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
 
- #mensajes-chat {
-     flex: 1;
-     overflow-y: auto;
-     font-size: 12px;
-     display: flex;
-     flex-direction: column;
-     gap: 6px;
-     padding-right: 4px;
- }
+.chat-input-row input {
+    flex: 1;
+    padding: 8px;
+    font-size: 12px;
+}
 
- .msg-item {
-     background: #252530;
-     padding: 6px 8px;
-     border-radius: 6px;
-     line-height: 1.3;
- }
+.chat-input-row button {
+    background: var(--naranja);
+    color: #fff;
+    border: none;
+    padding: 0 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
 
- .msg-autor {
-     font-weight: bold;
-     color: var(--naranja);
- }
+/* =========================================================
+   CÁMARAS INDIVIDUALES (2P Y 4P)
+   ========================================================= */
+.cam-2p-j1 #juego canvas, .cam-2p-j1 #video-remoto { transform: scaleY(2); transform-origin: top center; }
+.cam-2p-j2 #juego canvas, .cam-2p-j2 #video-remoto { transform: scaleY(2); transform-origin: bottom center; }
 
- .chat-input-row {
-     display: flex;
-     gap: 6px;
-     margin-top: 8px;
- }
-
- .chat-input-row input {
-     flex: 1;
-     padding: 8px;
-     font-size: 12px;
- }
-
- .chat-input-row button {
-     background: var(--naranja);
-     color: #fff;
-     border: none;
-     padding: 0 12px;
-     border-radius: 6px;
-     cursor: pointer;
-     font-weight: bold;
- }
-
- .cam-2p-j1 #juego canvas,
- .cam-2p-j1 #video-remoto {
-     transform: scaleY(2);
-     transform-origin: top center;
- }
-
- .cam-2p-j2 #juego canvas,
- .cam-2p-j2 #video-remoto {
-     transform: scaleY(2);
-     transform-origin: bottom center;
- }
-
- .cam-4p-j1 #juego canvas,
- .cam-4p-j1 #video-remoto {
-     transform: scale(2, 2);
-     transform-origin: top left;
- }
-
- .cam-4p-j2 #juego canvas,
- .cam-4p-j2 #video-remoto {
-     transform: scale(2, 2);
-     transform-origin: top right;
- }
-
- .cam-4p-j3 #juego canvas,
- .cam-4p-j3 #video-remoto {
-     transform: scale(2, 2);
-     transform-origin: bottom left;
- }
-
- .cam-4p-j4 #juego canvas,
- .cam-4p-j4 #video-remoto {
-     transform: scale(2, 2);
-     transform-origin: bottom right;
- }
+.cam-4p-j1 #juego canvas, .cam-4p-j1 #video-remoto { transform: scale(2, 2); transform-origin: top left; }
+.cam-4p-j2 #juego canvas, .cam-4p-j2 #video-remoto { transform: scale(2, 2); transform-origin: top right; }
+.cam-4p-j3 #juego canvas, .cam-4p-j3 #video-remoto { transform: scale(2, 2); transform-origin: bottom left; }
+.cam-4p-j4 #juego canvas, .cam-4p-j4 #video-remoto { transform: scale(2, 2); transform-origin: bottom right; }
